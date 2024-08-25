@@ -17,11 +17,6 @@
 ## Requirements
 
 - **.NET Framework**: The app is developed for the .NET Framework.
-- **Libraries**:
-  - **NAudio**: For audio file conversion.
-  - **ImageSharp**: For image conversion.
-  - **NReco.VideoConverter**: For video conversion.
-  - **FFmpeg**: Required for converting additional audio formats not directly supported by NAudio.
 
 ## Installation
 
