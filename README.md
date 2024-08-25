@@ -25,16 +25,8 @@
 
 ## Installation
 
-1. Clone the repository to your local machine:
-   ```bash
-   git clone https://github.com/SuitPumpkin/MultimediaFormatConverter.git
-   ```
-
-2. Open the solution in Visual Studio.
-
-3. Restore the NuGet packages and build the project.
-
-4. Make sure you have FFmpeg installed and accessible in your PATH.
+1. Download the latest release
+2. Install the setup file (or unzip the file in a folder if you choosed the portable version)
 
 ## Usage
 
