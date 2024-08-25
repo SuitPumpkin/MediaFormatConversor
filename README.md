@@ -48,7 +48,3 @@
 ## Contributions
 
 Contributions are welcome. If you encounter any issues or have suggestions to improve the app, please open an issue or submit a pull request.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
