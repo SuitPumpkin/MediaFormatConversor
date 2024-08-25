@@ -20,7 +20,7 @@
 
 ## Installation
 
-1. Download the latest release
+1. Download the [latest release](https://github.com/SuitPumpkin/MultimediaFormatConverter/releases/tag/Release)
 2. Install the setup file (or unzip the file in a folder if you choosed the portable version)
 
 ## Usage
