@@ -1,2 +1,2 @@
-# MediaFormatConversor
-(Unpublished; updates may be forthcoming to correct language inconsistencies.)
+# Multimedia Format Converter
+(Not completed yet; updates are expected to finalize it.)
