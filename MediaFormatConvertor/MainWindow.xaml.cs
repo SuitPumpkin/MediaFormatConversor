@@ -13,16 +13,16 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace MediaFormatConvertor
+namespace MultimediaFormatConverter
 {
     public partial class MainWindow : Window
     {
-        public class ItemLista
+        public class ListItem
         {
-            public string? NombreArchivo { get; set; }
-            public MediaType? TipoDeArchivo { get; set; }
+            public string? FileName { get; set; }
+            public MediaType? FileType { get; set; }
         }
-        private ObservableCollection<ItemLista> _items = new ObservableCollection<ItemLista>();
+        private ObservableCollection<ListItem> _items = new ObservableCollection<ListItem>();
         public enum MediaType
         {
             Image,
@@ -69,29 +69,29 @@ namespace MediaFormatConvertor
             { MediaType.Audio, typeof(AudioFormat) },
             { MediaType.Video, typeof(VideoFormat) }
         };
-        private MediaType Tiposeleccionado = MediaType.Image;
+        private MediaType SelectedTypeOnComboBox = MediaType.Image;
         public MainWindow()
         {
             InitializeComponent();
-            _items.CollectionChanged += (sender, e) => CambioEnLista();
+            _items.CollectionChanged += (sender, e) => ListUpdated();
         }
-        private void MoverVentana(object sender, MouseButtonEventArgs e)
+        private void MoveWindow(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
             {
                 DragMove();
             }
         }
-        private void PrepararVentana(object sender, RoutedEventArgs e)
+        private void PrepareWindow(object sender, RoutedEventArgs e)
         {
-            InputExtention.ItemsSource = Enum.GetValues(typeof(MediaType));
-            InputExtention.SelectedIndex = 0;
+            InputExtension.ItemsSource = Enum.GetValues(typeof(MediaType));
+            InputExtension.SelectedIndex = 0;
         }
-        private void CerrarVentana(object sender, MouseButtonEventArgs e)
+        private void CloseWindow(object sender, MouseButtonEventArgs e)
         {
             Close();
         }
-        private void CargarArchivo(object sender, MouseButtonEventArgs e)
+        private void LoadFile(object sender, MouseButtonEventArgs e)
         {
             var openFileDialog = new Microsoft.Win32.OpenFileDialog
             {
@@ -103,54 +103,53 @@ namespace MediaFormatConvertor
             {
                 foreach (var fileName in openFileDialog.FileNames)
                 {
-                    ProcesarArchivo(fileName);
+                    ProcessFile(fileName);
                 }
             }
         }
         private string GetFileFilter()
         {
-            var selectedType = (MediaType)InputExtention.SelectedItem;
+            var selectedType = (MediaType)InputExtension.SelectedItem;
             return selectedType switch
             {
-                MediaType.Image => "Archivos de imagen|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.webp;*.tiff",
-                MediaType.Audio => "Archivos de audio|*.mp3;*.wav;*.aac;*.flac;*.ogg;*.wma",
-                MediaType.Video => "Archivos de video|*.mp4;*.avi;*.mkv;*.webm;*.mov;*.flv;*.wmv",
-                _ => throw new InvalidOperationException("Tipo de archivo no soportado")
+                MediaType.Image => "Image files|*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.webp;*.tiff",
+                MediaType.Audio => "Audio files|*.mp3;*.wav;*.aac;*.flac;*.ogg;*.wma",
+                MediaType.Video => "Video files|*.mp4;*.avi;*.mkv;*.webm;*.mov;*.flv;*.wmv",
+                _ => throw new InvalidOperationException("Unsupported file type")
             };
         }
-        private void ProcesarArchivo(string filePath)
+        private void ProcessFile(string filePath)
         {
             string extension = System.IO.Path.GetExtension(filePath).ToLower();
-            var selectedType = (MediaType)InputExtention.SelectedItem;
+            var selectedType = (MediaType)InputExtension.SelectedItem;
             if (MediaExtensions[selectedType].Contains(extension))
             {
-                if (!_items.Any(item => item.NombreArchivo.Equals(filePath, StringComparison.OrdinalIgnoreCase)))
+                if (!_items.Any(item => item.FileName.Equals(filePath, StringComparison.OrdinalIgnoreCase)))
                 {
-                    _items.Add(new ItemLista() { NombreArchivo = filePath, TipoDeArchivo = selectedType });
+                    _items.Add(new ListItem() { FileName = filePath, FileType = selectedType });
                 }
             }
             else
             {
                 if (_items.Count > 0)
                 {
-                    DropAnouncement.Opacity = 0;
-                    MessageBox.Show("El archivo seleccionado no coincide con el tipo de archivo esperado.");
+                    DropAnnouncement.Opacity = 0;
+                    MessageBox.Show("The selected file does not match the expected file type.");
                 }
                 else
                 {
-                    // Validar si coincide la extensión del archivo con alguno de los tipos soportados
                     var matchedType = MediaExtensions.FirstOrDefault(pair => pair.Value.Contains(extension)).Key;
 
                     if (matchedType != default)
                     {
-                        InputExtention.SelectedItem = matchedType;
-                        _items.Add(new ItemLista() { NombreArchivo = filePath, TipoDeArchivo = matchedType });
-                        DropAnouncement.Opacity = 0;
+                        InputExtension.SelectedItem = matchedType;
+                        _items.Add(new ListItem() { FileName = filePath, FileType = matchedType });
+                        DropAnnouncement.Opacity = 0;
                     }
                     else
                     {
-                        DropAnouncement.Opacity = 1;
-                        MessageBox.Show("El archivo seleccionado no coincide con el tipo de archivo esperado.");
+                        DropAnnouncement.Opacity = 1;
+                        MessageBox.Show("The selected file does not match the expected file type.");
                     }
                 }
             }
@@ -160,8 +159,8 @@ namespace MediaFormatConvertor
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 e.Effects = DragDropEffects.Copy;
-                DropAnouncement.Opacity = 1;
-                DropAnouncementText.Text = "Drop your file";
+                DropAnnouncement.Opacity = 1;
+                DropAnnouncementText.Text = "Drop your file";
             }
             else
             {
@@ -170,14 +169,14 @@ namespace MediaFormatConvertor
         }
         private void InputDragLeave(object sender, DragEventArgs e)
         {
-            DropAnouncementText.Text = "Drop or Search for a file";
+            DropAnnouncementText.Text = "Drop or Search for a file";
             if (_items.Count > 0)
             {
-                DropAnouncement.Opacity = 0;
+                DropAnnouncement.Opacity = 0;
             }
             else
             {
-                DropAnouncement.Opacity = 1;
+                DropAnnouncement.Opacity = 1;
             }
         }
         private void InputDragOver(object sender, DragEventArgs e)
@@ -191,61 +190,65 @@ namespace MediaFormatConvertor
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 foreach (string file in files)
                 {
-                    ProcesarArchivo(file);
+                    ProcessFile(file);
                 }
 
                 if (_items.Count < files.Length)
                 {
-                    MessageBox.Show("Algunos archivos no son compatibles y fueron descartados.");
+                    MessageBox.Show("Some files were not supported and got discarded.");
                 }
             }
         }
-        private void FormatoDeInputSeleccionado(object sender, RoutedEventArgs e)
+        private void SelectedNewInputFormat(object sender, RoutedEventArgs e)
         {
-            var selectedType = (MediaType)InputExtention.SelectedItem;
-            if (Tiposeleccionado != selectedType)
+            var selectedType = (MediaType)InputExtension.SelectedItem;
+            if (SelectedTypeOnComboBox != selectedType)
             {
-                Tiposeleccionado = selectedType;
+                SelectedTypeOnComboBox = selectedType;
                 if (_items.Count > 0)
                 {
-                    MessageBoxResult pregunta = MessageBox.Show("Cuidado", "Esto borrará los items que ya tienes cargados, estas seguro que deseas proceder?", MessageBoxButton.YesNo);
-                    if (pregunta == MessageBoxResult.Yes)
+                    MessageBoxResult response = MessageBox.Show("Alert", "This will clear the list of files. Proceed anyway?", MessageBoxButton.YesNo);
+                    if (response == MessageBoxResult.Yes)
                     {
                         _items.Clear();
                     }
                     else
                     {
-                        switch (Tiposeleccionado) { case MediaType.Image: InputExtention.SelectedIndex = 0; break; case MediaType.Audio: InputExtention.SelectedIndex = 1; break; case MediaType.Video: InputExtention.SelectedIndex = 2; break; };
+                        switch (SelectedTypeOnComboBox)
+                        {
+                            case MediaType.Image: InputExtension.SelectedIndex = 0; break;
+                            case MediaType.Audio: InputExtension.SelectedIndex = 1; break;
+                            case MediaType.Video: InputExtension.SelectedIndex = 2; break;
+                        }
                     }
                 }
             }
-            OutputExtention.ItemsSource = Enum.GetValues(FormatTypeMapping[Tiposeleccionado]);
-            OutputExtention.SelectedIndex = 0;
+            OutputExtension.ItemsSource = Enum.GetValues(FormatTypeMapping[SelectedTypeOnComboBox]);
+            OutputExtension.SelectedIndex = 0;
         }
-        private void Convertir(object sender, MouseButtonEventArgs e)
+        private void Convert(object sender, MouseButtonEventArgs e)
         {
             if (_items.Count > 0)
             {
-                Conversión();
+                Conversion();
             }
             else
             {
-                MessageBox.Show("Aún no hay ningún archivo para convertir");
+                MessageBox.Show("The list is empty!");
             }
         }
-        private void MostrarProgreso()
+        private void ShowProgress()
         {
             AppMain.IsEnabled = false;
             ProgressBorder.Visibility = Visibility.Visible;
         }
-        private void OcultarProgreso()
+        private void HideProgress()
         {
             AppMain.IsEnabled = true;
             ProgressBorder.Visibility = Visibility.Collapsed;
         }
         private void UpdateProgress(int processedFiles, int totalFiles)
         {
-            // Solo actualiza la barra si el total es mayor a cero
             if (totalFiles > 0)
             {
                 Dispatcher.Invoke(() =>
@@ -255,10 +258,9 @@ namespace MediaFormatConvertor
                 });
             }
         }
-        private async void Conversión()
+        private async void Conversion()
         {
-            MostrarProgreso();
-            // Crear un diálogo para seleccionar la carpeta de destino
+            ShowProgress();
             var folderDialog = new System.Windows.Forms.FolderBrowserDialog();
             var result = folderDialog.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
@@ -266,29 +268,24 @@ namespace MediaFormatConvertor
                 string outputFolderPath = folderDialog.SelectedPath;
                 int totalFiles = _items.Count;
                 int processedFiles = 0;
-                var selecteditemuwu = OutputExtention.SelectedItem;
+                var selectedItem = OutputExtension.SelectedItem;
                 await Task.Run(async () =>
                 {
                     foreach (var item in _items)
                     {
-                        // Generar la ruta de salida para el archivo convertido
-                        string outputFilePath = System.IO.Path.Combine(outputFolderPath, System.IO.Path.GetFileNameWithoutExtension(item.NombreArchivo) + "." + selecteditemuwu.ToString().ToLower());
-
-                        // Convertir basado en el tipo de archivo
-                        switch (item.TipoDeArchivo)
+                        string outputFilePath = System.IO.Path.Combine(outputFolderPath, System.IO.Path.GetFileNameWithoutExtension(item.FileName) + "." + selectedItem.ToString().ToLower());
+                        switch (item.FileType)
                         {
                             case MediaType.Audio:
-                                await Task.Run(() => ConvertirAudio(item.NombreArchivo, outputFilePath, (AudioFormat)selecteditemuwu));
+                                await Task.Run(() => ConvertAudio(item.FileName, outputFilePath, (AudioFormat)selectedItem));
                                 break;
                             case MediaType.Image:
-                                await Task.Run(() => ConvertirImagen(item.NombreArchivo, outputFilePath, (ImageFormat)selecteditemuwu));
+                                await Task.Run(() => ConvertImage(item.FileName, outputFilePath, (ImageFormat)selectedItem));
                                 break;
                             case MediaType.Video:
-                                await Task.Run(() => ConvertirVideo(item.NombreArchivo, outputFilePath, (VideoFormat)selecteditemuwu));
+                                await Task.Run(() => ConvertVideo(item.FileName, outputFilePath, (VideoFormat)selectedItem));
                                 break;
                         }
-
-                        // Actualizar el progreso en el hilo principal
                         Dispatcher.Invoke(() =>
                         {
                             processedFiles++;
@@ -296,15 +293,15 @@ namespace MediaFormatConvertor
                         });
                     }
                 });
-                OcultarProgreso();
-                MessageBox.Show("Conversión completa!");
+                HideProgress();
+                MessageBox.Show("Done!");
             }
             else
             {
-                MessageBox.Show("No se seleccionó ninguna carpeta.");
+                MessageBox.Show("No folder selected!");
             }
         }
-        private void ConvertirAudio(string inputFilePath, string outputFilePath, AudioFormat outputFormat)
+        private void ConvertAudio(string inputFilePath, string outputFilePath, AudioFormat outputFormat)
         {
             using var reader = new NAudio.Wave.AudioFileReader(inputFilePath);
             switch (outputFormat)
@@ -315,26 +312,23 @@ namespace MediaFormatConvertor
                         reader.CopyTo(writer);
                     }
                     break;
-
                 case AudioFormat.Wav:
                     using (var writer = new NAudio.Wave.WaveFileWriter(outputFilePath, reader.WaveFormat))
                     {
                         reader.CopyTo(writer);
                     }
                     break;
-
                 case AudioFormat.Aac:
                 case AudioFormat.Flac:
                 case AudioFormat.Ogg:
                 case AudioFormat.Wma:
-                    ConvertirConFFmpeg(inputFilePath, outputFilePath, outputFormat);
+                    ConvertUsingFfmpeg(inputFilePath, outputFilePath, outputFormat);
                     break;
-
                 default:
-                    throw new NotSupportedException($"El formato {outputFormat} no es soportado.");
+                    throw new NotSupportedException($"{outputFormat} format is not supported.");
             }
         }
-        private void ConvertirConFFmpeg(string inputFilePath, string outputFilePath, AudioFormat outputFormat)
+        private void ConvertUsingFfmpeg(string inputFilePath, string outputFilePath, AudioFormat outputFormat)
         {
             var arguments = outputFormat switch
             {
@@ -342,9 +336,8 @@ namespace MediaFormatConvertor
                 AudioFormat.Wma => $"-i \"{inputFilePath}\" -c:a wma \"{outputFilePath}\"",
                 AudioFormat.Flac => $"-i \"{inputFilePath}\" -c:a flac \"{outputFilePath}\"",
                 AudioFormat.Ogg => $"-i \"{inputFilePath}\" -c:a libvorbis \"{outputFilePath}\"",
-                _ => throw new NotSupportedException($"El formato {outputFormat} no es soportado por FFmpeg.")
+                _ => throw new NotSupportedException($"{outputFormat} format is not supported.")
             };
-
             var process = new System.Diagnostics.Process
             {
                 StartInfo = new System.Diagnostics.ProcessStartInfo
@@ -356,15 +349,12 @@ namespace MediaFormatConvertor
                     CreateNoWindow = true,
                 }
             };
-
             process.Start();
             process.WaitForExit();
         }
-        private void ConvertirImagen(string inputFilePath, string outputFilePath, ImageFormat outputFormat)
+        private void ConvertImage(string inputFilePath, string outputFilePath, ImageFormat outputFormat)
         {
-            // Lee la imagen del archivo de entrada
             using var image = SixLabors.ImageSharp.Image.Load(inputFilePath);
-            // Declara el encoder
             SixLabors.ImageSharp.Formats.IImageEncoder encoder = outputFormat switch
             {
                 ImageFormat.Png => new SixLabors.ImageSharp.Formats.Png.PngEncoder(),
@@ -373,12 +363,11 @@ namespace MediaFormatConvertor
                 ImageFormat.Gif => new SixLabors.ImageSharp.Formats.Gif.GifEncoder(),
                 ImageFormat.Webp => new SixLabors.ImageSharp.Formats.Webp.WebpEncoder(),
                 ImageFormat.Tiff => new SixLabors.ImageSharp.Formats.Tiff.TiffEncoder(),
-                _ => throw new NotSupportedException($"El formato {outputFormat} no es soportado."),
+                _ => throw new NotSupportedException($"{outputFormat} format is not supported."),
             };
-            // Guarda la imagen en el archivo de salida con el formato deseado
             image.Save(outputFilePath, encoder);
         }
-        private void ConvertirVideo(string inputFilePath, string outputFilePath, VideoFormat outputFormat)
+        private void ConvertVideo(string inputFilePath, string outputFilePath, VideoFormat outputFormat)
         {
             var ffmpeg = new NReco.VideoConverter.FFMpegConverter();
             string extension = outputFormat switch
@@ -390,30 +379,30 @@ namespace MediaFormatConvertor
                 VideoFormat.Mov => ".mov",
                 VideoFormat.Flv => ".flv",
                 VideoFormat.Wmv => ".wmv",
-                _ => throw new NotSupportedException($"El formato {outputFormat} no es soportado."),
+                _ => throw new NotSupportedException($"{outputFormat} format is not supported."),
             };
             ffmpeg.ConvertMedia(inputFilePath, outputFilePath + extension, null);
         }
-        private void CambioEnLista()
+        private void ListUpdated()
         {
-            ListaDeArchivos.ItemsSource = _items;
-
+            FileList.ItemsSource = _items;
             if (_items.Count > 0)
             {
-                DropAnouncement.Opacity = 0;
+                DropAnnouncement.Opacity = 0;
             }
             else
             {
-                DropAnouncement.Opacity = 1;
+                DropAnnouncement.Opacity = 1;
             }
         }
-        private void RemoverItemLista(object sender, MouseButtonEventArgs e)
+        private void RemoveListItem(object sender, MouseButtonEventArgs e)
         {
-            IconBlock? ItemABorrar = sender as IconBlock;
-            if (ItemABorrar != null)
+            IconBlock? itemToRemove = sender as IconBlock;
+            if (itemToRemove != null)
             {
-                _items.Remove(_items.FirstOrDefault(item => item.NombreArchivo.Equals(ItemABorrar.Uid, StringComparison.OrdinalIgnoreCase)));
+                _items.Remove(_items.FirstOrDefault(item => item.FileName.Equals(itemToRemove.Uid, StringComparison.OrdinalIgnoreCase)));
             }
         }
     }
 }
+

@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace MediaFormatConvertor
+namespace MultimediaFormatConverter
 {
     /// <summary>
     /// Interaction logic for App.xaml
